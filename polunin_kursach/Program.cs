@@ -10,19 +10,19 @@ namespace polunin_kursach
     {
         static void Main(string[] args)
         {
-            const int N = 100000;
+            var fs = new Func<double, double[], double>[] {
+                (double x, double[] ys) => 1,
+                (double x, double[] ys) => 2 * ys[0],
+                (double x, double[] ys) => 3 * ys[1],
+                (double x, double[] ys) => 4 * ys[2]
+            };
 
-            int cell = 0;
+            double[] y0s = new double[] { 0, 0, 0, 0 };
+            double[] xs = new double[] { 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 };
 
-            for (int i = 0; i < N; i++)
-            {
-                double num = Gauss.Generate(1);
+            var X = RungeCutta.Integrate(fs, y0s, xs);
 
-                if (num >= 0 && num < 1)
-                    cell++;
-            }
-
-            Console.WriteLine((double)cell / N);
+            Console.WriteLine(X);
         }
     }
 }
