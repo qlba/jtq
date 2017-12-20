@@ -77,23 +77,25 @@ namespace polunin_kursach
         }
 
 
-        public Matrix transpose()
+        public Matrix Transpose()
         {
             Matrix result = new Matrix(m, n);
 
             for (int i = 0; i < n; i++)
                 for (int j = 0; j < m; j++)
                     result[j, i] = this[i, j];
+
+            return result;
         }
 
 
-        private void multiplyRow(int row, double multiplicator)
+        private void MultiplyRow(int row, double multiplicator)
         {
             for (var j = 0; j < m; j++)
                 this[row, j] *= multiplicator;
         }
 
-        private void swapRows(int row1, int row2)
+        private void SwapRows(int row1, int row2)
         {
             double swapBuffer;
 
@@ -108,22 +110,22 @@ namespace polunin_kursach
             }
         }
 
-        private void addMultipliedRow(int dstRow, int srcRow, double multiplicator)
+        private void AddMultipliedRow(int dstRow, int srcRow, double multiplicator)
         {
             for (var j = 0; j < m; j++)
                 this[dstRow, j] += multiplicator * this[srcRow, j];
         }
         
-        private void makeBasic(int row, int column)
+        private void MakeBasic(int row, int column)
         {
-            multiplyRow(row, 1 / this[row, column]);
+            MultiplyRow(row, 1 / this[row, column]);
 
             for (int i = 0; i < n; i++)
                 if (i != row)
-                    addMultipliedRow(i, row, -this[i, column]);
+                    AddMultipliedRow(i, row, -this[i, column]);
         }
 
-        public Matrix invert()
+        public Matrix Invert()
         {
             if (n != m)
                 throw new IncompatibleSizesException();
@@ -146,9 +148,10 @@ namespace polunin_kursach
                 for (int i = 0; i < n; i++)
                     if (system[i, j] != 0 && !used[i])
                     {
-                        system.swapRows(j, i);
-                        system.makeBasic(i, j);
+                        system.SwapRows(j, i);
+                        system.MakeBasic(i, j);
                         used[i] = true;
+                        done = true;
                     }
 
                 if (!done)
@@ -159,13 +162,24 @@ namespace polunin_kursach
 
             for (int i = 0; i < n; i++)
                 for (int j = 0; j < n; j++)
-                    result[i, j] = system[i, j];
+                    result[i, j] = system[i, n + j];
 
             return result;
         }
 
 
+        public double Module()
+        {
+            double sum = 0;
 
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < m; j++)
+                    sum += this[i, j] * this[i, j];
+
+            return Math.Sqrt(sum);
+        }
+
+        
         public Matrix Clone()
         {
             Matrix result = new Matrix(this.n, this.m);
