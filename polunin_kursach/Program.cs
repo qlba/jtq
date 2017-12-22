@@ -10,8 +10,11 @@ namespace polunin_kursach
     {
         static void Main(string[] args)
         {
-            Console.WriteLine(Satellite.phi(0.1, 2, 0, 1) * 180 / Math.PI);
-            Satellite.fly();
+            var xs = Satellite.getMoments(-6e6, 6e6, 5000, 5000,
+                new double[] { 6e6 },
+                new double[] { 6e6 },
+                600
+            );
         }
     }
 }
