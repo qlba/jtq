@@ -10,10 +10,11 @@ namespace polunin_kursach
     {
         static void Main(string[] args)
         {
-            var xs = Satellite.getMoments(-6e6, 6e6, 5000, 5000,
+            var xs = Satellite.getGaugings(-6e6, 6e6, 5000, 5000,
                 new double[] { 6e6 },
                 new double[] { 6e6 },
-                600
+                600, 10,
+                Satellite.LandmarkSelection.NEAREST
             );
         }
     }
