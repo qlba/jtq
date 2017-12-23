@@ -6,19 +6,19 @@ using System.Threading.Tasks;
 
 namespace polunin_kursach
 {
-    class Program
+    class _Program
     {
-        static void Main(string[] args)
+        static void _Main(string[] args)
         {
             // Начальные условия (по заданию)
-            double x0 = -6e6;
-            double y0 = 6e6;
-            double vx = 5000;
-            double vy = 5000;
+            double xk = -6e6;
+            double yk = 6e6;
+            double vx = 4000;
+            double vy = 4000;
 
             // Задаем интервал (время в секундах) и количество измерений
-            int interval = 60;
-            int count = 20;
+            int interval = 10;
+            int count = 200;
 
             // Среднеквадратическая погрешность (по условию)
             //
@@ -26,10 +26,11 @@ namespace polunin_kursach
             // перевести в радианы
             // 1 угловая минута -- 60-я доля градуса
             // В 180 градусах 3.14 (ПИ) радианов
-            double sigma = (1 / 60) * (Math.PI / 180);
+            //double sigma = 0.01 * (1.0 / 60) * (Math.PI / 180);
+            double sigma = (1.0 / 60) * (Math.PI / 180);
 
             // "Расставляем" ориентиры
-            Landmarks.LandmarkCoords landmarkCoords = Landmarks.setLandmarksGrid(-40, 1, 10);
+            Landmarks.LandmarkCoords landmarkCoords = Landmarks.setLandmarksGrid(-45, 1, 1);
 
             // Задаем правило выбора ориентира
             Satellite.LandmarkSelection selection = Satellite.LandmarkSelection.NEAREST;
@@ -39,7 +40,7 @@ namespace polunin_kursach
             // измерений и ориентиры, по которым каждое измерение
             // производится
             Satellite.Gauging[] gaugings = Satellite.getGaugings(
-                x0, y0, vx, vy,
+                xk, yk, vx, vy,
                 landmarkCoords.x0s, landmarkCoords.y0s,
                 interval, count, selection
             );
@@ -48,7 +49,7 @@ namespace polunin_kursach
             // условиях -- вычисляем математическую модель вектора измерений
             // z(тета_ист), где тета_ист -- истинные значения оцениваемых
             // параметров, указанные в задании. Этот вектор обозначается D.
-            double[] _D = Satellite.getZ(gaugings, x0, y0, vx, vy,
+            double[] _D = Satellite.getZ(gaugings, xk, yk, vx, vy,
                 landmarkCoords.x0s, landmarkCoords.y0s
             );
 
@@ -72,6 +73,17 @@ namespace polunin_kursach
             // Получаем вектор измерений с заданными погрешностями
             Matrix R = D + v;
 
+            // Матрица Kv^-1 -- корелляционная матрица погрешностей
+            // измерений в степени (-1) -- диагональная, все элементы
+            // на ее диагонали равны среднеквадратической погрешности
+            // измерений в степени (-2)
+            //
+            // KvInv -- Kv Inverted (обратная по отношению к Kv)
+            Matrix KvInv = new Matrix(count, count);
+
+            for (int i = 0; i < count; i++)
+                KvInv[i, i] = Math.Pow(sigma, -2);
+
 
             // Попытаемся подобрать начальное приближение оцениваемых
             // параметров, то есть такие значения xk, yk, vx, vy,
@@ -84,22 +96,72 @@ namespace polunin_kursach
             // умножить координаты ориентира на число k, получим точку,
             // которая в k раз дальше от центра планеты, чем этот ориентир.
             // Положим k = 2.
-            x0 = 2 * landmarkCoords.x0s[gaugings[0].landmark];
-            y0 = 2 * landmarkCoords.y0s[gaugings[0].landmark];
+            xk = 1.4 * -Satellite.PLANET_RADIUS;
+            yk = 0;
 
-            // Скорости == 0??
+            // Скорости черт знает как приближать
             vx = 0;
-            vy = 0;
+            vy = 7500;
+
+            // Соберем оцениваемые параметры в вектор тета
+            Matrix theta = new Matrix(4, 1);
+            theta[0, 0] = xk;
+            theta[1, 0] = yk;
+            theta[2, 0] = vx;
+            theta[3, 0] = vy;
 
 
+            // Точность вычисления вектора оцениваемых параметров.
+            // Если на каком-то шаге модуль вектора подшагивания
+            // будет меньше этой величины, остановить работу ММП.
+            double EPSILON = 1e6;
 
 
-            try
+            // Создадим обертку над функцией Satellite.getZ такую,
+            // чтобы она принимала и возвращала матрицу
+            Func<Matrix, Matrix> z = (Matrix _theta) =>
             {
-            }
-            catch(Satellite.CannotMakeThisManyGaugings ex)
+                // Переменные здесь именуются с подчеркивания
+                // только из-за ограничений языка C#
+                double _xk = _theta[0, 0];
+                double _yk = _theta[1, 0];
+                double _vx = _theta[2, 0];
+                double _vy = _theta[3, 0];
+
+                return Matrix.FromArray(
+                    Satellite.getZ(gaugings, _xk, _yk, _vx, _vy, landmarkCoords.x0s, landmarkCoords.y0s)
+                );
+            };
+
+
+            // Корреляционная матрица погрешностей оцениваемых параметров.
+            // Эта переменная используется как выходной параметр в MMP_Step
+            Matrix TError = null;
+
+
+            // Метод максимального правдоподобия
+            for (int i = 0; i < 1; i++)
             {
-                Console.WriteLine(ex.ToString());
+                // Вычисляем матрицу производных
+                Matrix L = MMP.LThetaI(z, theta, count, 4, 0.1);
+
+                // Вызовем метод максимального правдоподобия. Он
+                // вернет следующее приближение вектора оцениваемых
+                // параметров.
+                Matrix theta1 = MMP.MMP_Step(L, KvInv, R, z(theta), theta, out TError);
+
+                // Запомним, насколько следующее приближение вектора оцениваемых
+                // параметров отличается от текущего.
+                double difference = (theta1 - theta).Module();
+
+                // Теперь берем следующее приближение вектора оцениваемых
+                // параметров за текущее.
+                theta = theta1;
+
+                // Если следующее приближение отличается от текущего меньше,
+                // чем на EPSILON, остановить вычисление.
+                if (difference < EPSILON)
+                    break;
             }
         }
     }

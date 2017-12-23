@@ -489,6 +489,7 @@ namespace polunin_kursach
 
 
                 // Отладочный вывод, убрать к чертям собачим
+                /*
                 Console.WriteLine("{5,4} {6,4} {0,8} {1,13:f} {2,13:f} {3,13:f} {4,13:f}",
                     String.Format("{0}:{1:00}", (int)t / 60 / 60, (int)t / 60 % 60),
                     gamma(xk, yk, x0s[gaugings[i].landmark], y0s[gaugings[i].landmark]) * 180 / Math.PI,
@@ -498,6 +499,7 @@ namespace polunin_kursach
                     i,
                     gaugings[i].landmark
                 );
+                */
             }
 
             // Возвращаем вычисленные по модели результаты измерений
