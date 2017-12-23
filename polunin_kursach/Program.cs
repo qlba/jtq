@@ -14,11 +14,16 @@ namespace polunin_kursach
 
             try
             {
-                var xs = Satellite.getGaugings(-6e6, 6e6, 5000, 5000,
+                var gaugings = Satellite.getGaugings(-6e6, 6e6, 5000, 5000,
                     new double[] { -4.3e6, 0 },
                     new double[] { 4.3e6, 6e6 },
-                    60, 100,
-                    Satellite.LandmarkSelection.NEAREST
+                    60, 50,
+                    Satellite.LandmarkSelection.ALTERNATE
+                );
+
+                var measures = Satellite.getZ(gaugings, -6e6, 6e6, 5000, 5000,
+                    new double[] { -4.3e6, 0 },
+                    new double[] { 4.3e6, 6e6 }
                 );
             }
             catch(Satellite.CannotMakeThisManyGaugings ex)
