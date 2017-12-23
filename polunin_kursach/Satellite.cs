@@ -45,9 +45,20 @@ namespace polunin_kursach
 
         public static double gamma(double xk, double yk, double x0, double y0)
         {
-            return Math.Acos(
-                (x0 * (xk - x0) + y0 * (yk - y0)) / (Math.Sqrt(x0 * x0 + y0 * y0) * Math.Sqrt((xk - x0) * (xk - x0) + (yk - y0) * (yk - y0)))
-            );
+            // Косинус угла между вектором нормали/вертикали у планете
+            // в точке нахождения ориентира и направлением на КА из
+            // точки нахождения ориентира
+            double cos = (x0 * (xk - x0) + y0 * (yk - y0)) /
+                (Math.Sqrt(x0 * x0 + y0 * y0) * Math.Sqrt((xk - x0) * (xk - x0) + (yk - y0) * (yk - y0)));
+
+            // Косинус угла может немного не попадать в отрезок [-1; 1]
+            // вследствие вычислительной погрешности, в этом случае его
+            // необходимо округлить до ближайшего целого, которым будет
+            // -1 или 1
+            if (Math.Abs(cos) > 1)
+                cos = Math.Round(cos);
+
+            return Math.Acos(cos);
         }
 
         public static bool inBand(double xk, double yk, double x0, double y0)
@@ -215,16 +226,6 @@ namespace polunin_kursach
                 for (int lm = 0; lm < lmCount; lm++)
                     if (inBand(xk, yk, x0s[lm], y0s[lm]))
                     {
-                        // Отладочный вывод, убрать к чертям собачим
-                        Console.WriteLine("{0,8} {1,16:f} {2,16:f} {3,16:f} {4,16:f}",
-                            String.Format("{0}:{1:00}", (int)t / 60 / 60, (int)t / 60 % 60),
-                            gamma(xk, yk, x0s[lm], y0s[lm]) * 180 / Math.PI,
-                            phi(xk, yk, x0s[lm], y0s[lm]) * 180 / Math.PI,
-                            Math.Atan2(yk, xk) * 180 / Math.PI,
-                            Math.Sqrt(xk * xk + yk * yk) - PLANET_RADIUS
-                        );
-
-
                         // Внесем lm -- номер (индекс) ориентира в список
                         landmarks.Add(lm);
                     }
@@ -303,12 +304,26 @@ namespace polunin_kursach
                         selectedLandmark = nearestLandmark;
                     }
 
-                    gaugings[done] = new Gauging(t, landmarks[selectedLandmark],
-                        phi(xk, yk, x0s[landmarks[selectedLandmark]], y0s[landmarks[selectedLandmark]]));
+                    // Запишем текущий момент времени t, выбранный ориентир
+                    // selectedLandmark и результат измерения по отношению
+                    // к нему угла ФИ в массив
+                    gaugings[done] = new Gauging(t, selectedLandmark,
+                        phi(xk, yk, x0s[selectedLandmark], y0s[selectedLandmark]));
 
                     // После записи измерения в массив, счетчик измерений
                     // инкрементируется
                     done++;
+
+                    // Отладочный вывод, убрать к чертям собачим
+                    Console.WriteLine("{5,4} {6,4} {0,8} {1,13:f} {2,13:f} {3,13:f} {4,13:f}",
+                        String.Format("{0}:{1:00}", (int)t / 60 / 60, (int)t / 60 % 60),
+                        gamma(xk, yk, x0s[selectedLandmark], y0s[selectedLandmark]) * 180 / Math.PI,
+                        phi(xk, yk, x0s[selectedLandmark], y0s[selectedLandmark]) * 180 / Math.PI,
+                        Math.Atan2(yk, xk) * 180 / Math.PI,
+                        Math.Sqrt(xk * xk + yk * yk) - PLANET_RADIUS,
+                        done,
+                        selectedLandmark
+                    );
                 }
 
 
