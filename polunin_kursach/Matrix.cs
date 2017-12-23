@@ -189,6 +189,41 @@ namespace polunin_kursach
             return result;
         }
 
+        public static Matrix FromArray(double[] array)
+        {
+            Matrix result = new Matrix(array.Length, 1);
+
+            for (int i = 0; i < array.Length; i++)
+                result[i, 0] = array[i];
+
+            return result;
+        }
+
+        public static Matrix FromArray(double[][] array)
+        {
+            Matrix result = new Matrix(array.Length, array[0].Length);
+
+            for (int i = 0; i < array.Length; i++)
+                for (int j = 0; j < array[i].Length; j++)
+                    result[i, j] = array[i][j];
+
+            return result;
+        }
+
+        public static Matrix FromArray(double[,] array)
+        {
+            int n = array.GetLength(0);
+            int m = array.GetLength(1);
+
+            Matrix result = new Matrix(n, m);
+
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < m; j++)
+                    result[i, j] = array[i, j];
+
+            return result;
+        }
+
         public override string ToString()
         {
             string result = "";
@@ -217,6 +252,7 @@ namespace polunin_kursach
         {
             Console.WriteLine(ToString());
         }
+
 
         public class IncompatibleSizesException : Exception { }
 

@@ -8,8 +8,8 @@ namespace polunin_kursach
 {
     class Satellite
     {
-        const double PLANET_RADIUS = 6 * 1e6;
-        const double PLANET_GRAVITY = 6;
+        public const double PLANET_RADIUS = 6 * 1e6;
+        public const double PLANET_GRAVITY = 6;
 
         const double GAMMA_MASS = -PLANET_GRAVITY * PLANET_RADIUS * PLANET_RADIUS;
 
