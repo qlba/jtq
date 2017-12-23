@@ -17,12 +17,19 @@ namespace polunin_kursach
             double vy = 4000;
 
             // Интервал измерений (время в секундах)
-            int interval = 10;
+            int interval = 20;
             // Количество измерений
-            int count = 200;
+            int count = 100;
 
             // Количество ориентиров
-            int landmarksCount = 1;
+            int landmarksCount = 2;
+
+            // Цена оборудования
+            double equipmentCost = 5e5;
+            // Цена одного измерения
+            double gaugingCost = 4e2;
+            // Цена подготовки исходных данных для одного ориентира
+            double landmarkCost = 2e4;
 
             // Среднеквадратическая погрешность (по условию)
             //
@@ -33,7 +40,7 @@ namespace polunin_kursach
             //double sigma = 0.01 * (1.0 / 60) * (Math.PI / 180);
             double sigma = (1.0 / 60) * (Math.PI / 180);
 
-            Landmarks.LandmarkCoords landmarkCoords = Landmarks.setLandmarksGrid(-45, 1, landmarksCount);
+            Landmarks.LandmarkCoords landmarkCoords = Landmarks.setLandmarksGrid(0, 1, landmarksCount);
 
             // Задаем правило выбора ориентира
             Satellite.LandmarkSelection selection = Satellite.LandmarkSelection.NEAREST;
@@ -75,21 +82,29 @@ namespace polunin_kursach
 
             Matrix TError = null;
 
-            Matrix L = MMP.LThetaI(z, theta, count, 4, 0.1);
-            MMP.MMP_Step(L, KvInv, R, z(theta), theta, out TError);
+            try
+            {
+                Matrix L = MMP.LThetaI(z, theta, count, 4, 0.1);
+                MMP.MMP_Step(L, KvInv, R, z(theta), theta, out TError);
 
-            Console.WriteLine(Math.Sqrt(TError[0, 0]));
-            Console.WriteLine(Math.Sqrt(TError[1, 1]));
-            Console.WriteLine(Math.Sqrt(TError[2, 2]));
-            Console.WriteLine(Math.Sqrt(TError[3, 3]));
-
-
-
-            double precision = Math.Sqrt(TError[2, 2] + TError[3, 3]);
-            double cost = 
+                Console.WriteLine(Math.Sqrt(TError[0, 0]));
+                Console.WriteLine(Math.Sqrt(TError[1, 1]));
+                Console.WriteLine(Math.Sqrt(TError[2, 2]));
+                Console.WriteLine(Math.Sqrt(TError[3, 3]));
 
 
-            Console.WriteLine("Точность: " + precision);
+
+                double precision = Math.Sqrt(TError[2, 2] + TError[3, 3]);
+                double cost = equipmentCost + gaugingCost * count + landmarkCost * landmarksCount;
+
+
+                Console.WriteLine("Точность:  " + precision + " м/с");
+                Console.WriteLine("Стоимость: " + cost + " у.е.");
+            }
+            catch(Matrix.LinearDependencyException ex)
+            {
+                Console.WriteLine("Невозможно вычислить матрицу, ее строки линейно зависимы.");
+            }
         }
     }
 }
