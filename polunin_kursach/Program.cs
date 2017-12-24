@@ -13,7 +13,7 @@ namespace polunin_kursach
             // Истинные параметры движения КА (они же начальные условия в
             // уравнениях движения КА, "y0s" в RungeCutta)
             //
-            // Указаны в задании, но можно менять
+            // Указаны в задании, но в принципе можно менять
             double xk_real = -6e6;
             double yk_real = 6e6;
             double vx_real = 5000;
@@ -29,14 +29,17 @@ namespace polunin_kursach
             // Задаем интервал измерений (время в секундах)
             //
             // Минимальный интервал указан в задании, можно менять
-            int interval = 3;
+            int interval = 8;
 
             // Задаем количество измерений
-            int gaugingCount = 400;
+            int gaugingCount = 80;
 
 
             // Задаем количество ориентиров
-            int landmarksCount = 20;
+            int landmarksCount = 1;
+
+            // Задаем расстояние между ориентирами (в градусах)
+            double landmarksDistance = 8;
 
             // Задаем правило выбора ориентира
             Satellite.LandmarkSelection selection = Satellite.LandmarkSelection.NEAREST;
@@ -57,7 +60,7 @@ namespace polunin_kursach
             // определяет, на сколько градусов следующий ориентир
             // отстоит от предыдущего по часовой стрелке. Третий параметр --
             // количество ориентиров.
-            Landmarks.LandmarkCoords landmarkCoords = Landmarks.setLandmarksGrid(-45, 4, landmarksCount);
+            Landmarks.LandmarkCoords landmarkCoords = Landmarks.setLandmarksGrid(-45, landmarksDistance, landmarksCount);
 
 
             // При известных начальных условиях вычисляем моменты
