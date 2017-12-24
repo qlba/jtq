@@ -8,7 +8,7 @@ namespace polunin_kursach
         {
             Matrix LKvInv = L * KvInv;
 
-            thetasSigma = (LKvInv * L.Transpose()).Invert();
+            thetasSigma = (LKvInv * L.Transpose()).Invert2();
 
             return theta + thetasSigma * LKvInv * (R - z_i);
         }

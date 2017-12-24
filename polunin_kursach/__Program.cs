@@ -6,39 +6,31 @@ using System.Threading.Tasks;
 
 namespace polunin_kursach
 {
-    class Program
+    class _Program
     {
-        static void Main(string[] args)
+        static void __Main(string[] args)
         {
-            Matrix m = Matrix.FromArray(new double[,] {
-                { 6, -5, 8, 4 },
-                { 9, 7, 5, 2 },
-                { 7, 5, 3, 7 },
-                { -4, 8, -8, -3 }
-            });
+            Func<Matrix, Matrix> zThetaI = (Matrix ThetaI) =>
+            {
+                double x1 = ThetaI[0, 0];
+                double x2 = ThetaI[1, 0];
 
-            Console.WriteLine(m.Invert2());
-            //Func<Matrix, Matrix> zThetaI = (Matrix ThetaI) =>
-            //{
-            //    double x1 = ThetaI[0, 0];
-            //    double x2 = ThetaI[1, 0];
+                return Matrix.FromArray(new double[] { x1 * x1 * x1 + x2 * x2 * x2 });
+            };
 
-            //    return Matrix.FromArray(new double[] { x1 * x1 * x1 + x2 * x2 * x2 });
-            //};
+            Matrix L = MMP.getL(
+                zThetaI,
+                Matrix.FromArray(new double[] { 1, 1 }),
+                1,
+                0.1
+            );
 
-            //Matrix L = MMP.getL(
-            //    zThetaI,
-            //    Matrix.FromArray(new double[] { 1, 1 }),
-            //    1,
-            //    0.1
-            //);
+            Console.WriteLine(L);
+            Console.WriteLine(L * L.Transpose());
 
-            //Console.WriteLine(L);
-            //Console.WriteLine(L * L.Transpose());
+            Matrix cmpi = (L * L.Transpose()).Invert();
 
-            //Matrix cmpi = (L * L.Transpose()).Invert();
-
-            //Console.WriteLine("Precision: {0}", cmpi[0, 0] + cmpi[1, 1]);
+            Console.WriteLine("Precision: {0}", cmpi[0, 0] + cmpi[1, 1]);
         }
 
         static void ___Main(string[] args)
