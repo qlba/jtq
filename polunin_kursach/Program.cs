@@ -119,7 +119,7 @@ namespace polunin_kursach
 
             // Создадим обертку над функцией Satellite.getZ такую,
             // чтобы она принимала и возвращала матрицу
-            Func<Matrix, Matrix> z = (Matrix _theta) =>
+            Func<Matrix, Matrix> _getZ = (Matrix _theta) =>
             {
                 // Переменные здесь именуются с подчеркивания
                 // только из-за ограничений языка C#
@@ -143,12 +143,12 @@ namespace polunin_kursach
             for (int i = 0; i < 1; i++)
             {
                 // Вычисляем матрицу производных
-                Matrix L = MMP.LThetaI(z, theta, count, 4, 0.1);
+                Matrix L = MMP.getL(_getZ, theta, count, 0.1);
 
                 // Вызовем метод максимального правдоподобия. Он
                 // вернет следующее приближение вектора оцениваемых
                 // параметров.
-                Matrix theta1 = MMP.MMP_Step(L, KvInv, R, z(theta), theta, out TError);
+                Matrix theta1 = MMP.MMP_Step(L, KvInv, R, _getZ(theta), theta, out TError);
 
                 // Запомним, насколько следующее приближение вектора оцениваемых
                 // параметров отличается от текущего.

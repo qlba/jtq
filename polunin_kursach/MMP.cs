@@ -4,27 +4,29 @@ namespace polunin_kursach
 {
     public class MMP
     {
-        public static Matrix MMP_Step(Matrix L, Matrix KvInv, Matrix R, Matrix zThetaI, Matrix ThetaI, out Matrix TError)
+        public static Matrix MMP_Step(Matrix L, Matrix KvInv, Matrix R, Matrix z_i, Matrix theta, out Matrix thetasSigma)
         {
             Matrix LKvInv = L * KvInv;
 
-            TError = (LKvInv * L.Transpose()).Invert();
+            thetasSigma = (LKvInv * L.Transpose()).Invert();
 
-            return ThetaI + TError * LKvInv * (R - zThetaI);
+            return theta + thetasSigma * LKvInv * (R - z_i);
         }
 
-        public static Matrix LThetaI(Func<Matrix, Matrix> zThetaI, Matrix ThetaI, int N, int k, double delta)
+        public static Matrix getL(Func<Matrix, Matrix> getZ, Matrix theta, int N, double delta)
         {
+            int k = theta.n;
+
             Matrix L = new Matrix(k, N);
 
             for (int i = 0; i < k; i++)
             {
-                Matrix thetaPlus = ThetaI.Clone(), thetaMinus = ThetaI.Clone();
+                Matrix thetaPlus = theta.Clone(), thetaMinus = theta.Clone();
 
                 thetaPlus[i, 0] += delta;
                 thetaMinus[i, 0] -= delta;
 
-                Matrix zPlus = zThetaI(thetaPlus), zMinus = zThetaI(thetaMinus);
+                Matrix zPlus = getZ(thetaPlus), zMinus = getZ(thetaMinus);
 
                 Matrix dzdti = (1 / (2 * delta)) * (zPlus - zMinus);
 

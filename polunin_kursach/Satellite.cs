@@ -312,17 +312,6 @@ namespace polunin_kursach
                     // После записи измерения в массив, счетчик измерений
                     // инкрементируется
                     done++;
-
-                    // Отладочный вывод, убрать к чертям собачим
-                    Console.WriteLine("{5,4} {6,4} {0,8} {1,13:f} {2,13:f} {3,13:f} {4,13:f}",
-                        String.Format("{0}:{1:00}", (int)t / 60 / 60, (int)t / 60 % 60),
-                        gamma(xk, yk, x0s[selectedLandmark], y0s[selectedLandmark]) * 180 / Math.PI,
-                        phi(xk, yk, x0s[selectedLandmark], y0s[selectedLandmark]) * 180 / Math.PI,
-                        Math.Atan2(yk, xk) * 180 / Math.PI,
-                        Math.Sqrt(xk * xk + yk * yk) - PLANET_RADIUS,
-                        done,
-                        selectedLandmark
-                    );
                 }
 
 
@@ -486,20 +475,6 @@ namespace polunin_kursach
                 // Остается лишь записать в массив результат измерения угла ФИ.
                 // Ориентир уже определен.
                 z[i] = phi(xk, yk, x0s[gaugings[i].landmark], y0s[gaugings[i].landmark]);
-
-
-                // Отладочный вывод, убрать к чертям собачим
-                /*
-                Console.WriteLine("{5,4} {6,4} {0,8} {1,13:f} {2,13:f} {3,13:f} {4,13:f}",
-                    String.Format("{0}:{1:00}", (int)t / 60 / 60, (int)t / 60 % 60),
-                    gamma(xk, yk, x0s[gaugings[i].landmark], y0s[gaugings[i].landmark]) * 180 / Math.PI,
-                    z[i] * 180 / Math.PI,
-                    Math.Atan2(yk, xk) * 180 / Math.PI,
-                    Math.Sqrt(xk * xk + yk * yk) - PLANET_RADIUS,
-                    i,
-                    gaugings[i].landmark
-                );
-                */
             }
 
             // Возвращаем вычисленные по модели результаты измерений

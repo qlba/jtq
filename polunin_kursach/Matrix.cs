@@ -155,7 +155,7 @@ namespace polunin_kursach
                     }
 
                 if (!done)
-                    throw new LinearDependencyException();
+                    throw new DegenerationException();
             }
 
             Matrix result = new Matrix(n, n);
@@ -254,8 +254,64 @@ namespace polunin_kursach
         }
 
 
+        public Matrix Invert2()
+        {
+            double det = Determinant();
+
+            if (det == 0)
+                throw new DegenerationException();
+
+            return (1 / det) * MatrixOfAlgebraicCompletions().Transpose();
+        }
+
+        public Matrix MatrixOfAlgebraicCompletions()
+        {
+            Matrix result = new Matrix(n, m);
+
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < m; j++)
+                    result[i, j] = AlgebraicCompletion(i, j);
+
+            return result;
+        }
+
+        public double Determinant()
+        {
+            if (n != m)
+                throw new IncompatibleSizesException();
+
+            if (n == 1)
+                return this[0, 0];
+
+            double result = 0;
+
+            for (int i = 0; i < n; i++)
+                result += this[i, 0] * AlgebraicCompletion(i, 0);
+
+            return result;
+        }
+
+        public double AlgebraicCompletion(int row, int column)
+        {
+            return Math.Pow(-1, row + column) * MinorMatrix(row, column).Determinant();
+        }
+
+        public Matrix MinorMatrix(int row, int column)
+        {
+            Matrix result = new Matrix(n - 1, m - 1);
+
+            for (int i = 0; i < n; i++)
+                if (i != row)
+                    for (int j = 0; j < m; j++)
+                        if (j != column)
+                            result[i < row ? i : i - 1, j < column ? j : j - 1] = this[i, j];
+
+            return result;
+        }
+
+
         public class IncompatibleSizesException : Exception { }
 
-        public class LinearDependencyException : Exception { }
+        public class DegenerationException : Exception { }
     }
 }

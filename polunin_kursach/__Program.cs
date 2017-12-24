@@ -10,6 +10,39 @@ namespace polunin_kursach
     {
         static void Main(string[] args)
         {
+            Matrix m = Matrix.FromArray(new double[,] {
+                { 6, -5, 8, 4 },
+                { 9, 7, 5, 2 },
+                { 7, 5, 3, 7 },
+                { -4, 8, -8, -3 }
+            });
+
+            Console.WriteLine(m.Invert2());
+            //Func<Matrix, Matrix> zThetaI = (Matrix ThetaI) =>
+            //{
+            //    double x1 = ThetaI[0, 0];
+            //    double x2 = ThetaI[1, 0];
+
+            //    return Matrix.FromArray(new double[] { x1 * x1 * x1 + x2 * x2 * x2 });
+            //};
+
+            //Matrix L = MMP.getL(
+            //    zThetaI,
+            //    Matrix.FromArray(new double[] { 1, 1 }),
+            //    1,
+            //    0.1
+            //);
+
+            //Console.WriteLine(L);
+            //Console.WriteLine(L * L.Transpose());
+
+            //Matrix cmpi = (L * L.Transpose()).Invert();
+
+            //Console.WriteLine("Precision: {0}", cmpi[0, 0] + cmpi[1, 1]);
+        }
+
+        static void ___Main(string[] args)
+        {
             // Начальные условия
             double xk = -6e6;
             double yk = 6e6;
@@ -17,9 +50,9 @@ namespace polunin_kursach
             double vy = 4000;
 
             // Интервал измерений (время в секундах)
-            int interval = 20;
+            int interval = 80;
             // Количество измерений
-            int count = 100;
+            int count = 25;
 
             // Количество ориентиров
             int landmarksCount = 2;
@@ -84,26 +117,26 @@ namespace polunin_kursach
 
             try
             {
-                Matrix L = MMP.LThetaI(z, theta, count, 4, 0.1);
+                Matrix L = MMP.getL(z, theta, count, 100);
                 MMP.MMP_Step(L, KvInv, R, z(theta), theta, out TError);
 
-                Console.WriteLine(Math.Sqrt(TError[0, 0]));
-                Console.WriteLine(Math.Sqrt(TError[1, 1]));
-                Console.WriteLine(Math.Sqrt(TError[2, 2]));
-                Console.WriteLine(Math.Sqrt(TError[3, 3]));
-
+                //Console.WriteLine(Math.Sqrt(TError[0, 0]));
+                //Console.WriteLine(Math.Sqrt(TError[1, 1]));
+                //Console.WriteLine(Math.Sqrt(TError[2, 2]));
+                //Console.WriteLine(Math.Sqrt(TError[3, 3]));
 
 
                 double precision = Math.Sqrt(TError[2, 2] + TError[3, 3]);
                 double cost = equipmentCost + gaugingCost * count + landmarkCost * landmarksCount;
 
 
-                Console.WriteLine("Точность:  " + precision + " м/с");
-                Console.WriteLine("Стоимость: " + cost + " у.е.");
+                Console.WriteLine("Погрешность: " + precision + " м/с");
+                Console.WriteLine("Стоимость:   " + cost + " у.е.");
             }
-            catch(Matrix.LinearDependencyException ex)
+            catch(Matrix.DegenerationException ex)
             {
-                Console.WriteLine("Невозможно вычислить матрицу, ее строки линейно зависимы.");
+                Console.WriteLine("Невозможно вычислить корреляционную матрицу погрешностей оценок, " +
+                    "обратная к ней матрица вырождена.");
             }
         }
     }
